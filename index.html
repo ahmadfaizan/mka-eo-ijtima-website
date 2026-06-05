@@ -143,6 +143,24 @@
   }
 
   .sub-events { padding: 0 1rem 0.85rem 1rem; }
+  .sub-events-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    padding: 0 1rem 0.85rem 1rem;
+  }
+  .sub-events-col-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+    padding-left: 0.1rem;
+  }
+  @media (max-width: 480px) {
+    .sub-events-columns { grid-template-columns: 1fr; }
+  }
   .sub-event {
     display: flex;
     align-items: flex-start;
@@ -539,12 +557,12 @@ const DEFAULT_PROGRAM = [
     icon: "🏆",
     type: "main",
     subs: [
-      { id:"c1-sports", icon:"⚽", name:"Soccer · Races · Tug of War", location:"Soccer / Flag Football Field" },
-      { id:"c1-bball",  icon:"🏀", name:"3PT Basketball (open to all)", location:"Gym" },
-      { id:"c1-quran",  icon:"📖", name:"Tilawaat · Adhaan · Hifz-e-Quran", location:"Library" },
-      { id:"c1-speech", icon:"🎙", name:"Speeches · Nazm", location:"Khuddam Room" },
-      { id:"c1-mem",    icon:"🧠", name:"Memory & Observation", location:"Main Prayer Hall" },
-      { id:"c1-hub",    icon:"🎮", name:"Table Tennis · Board Games · Video Games", location:"Hub Zone (Upstairs)" }
+      { id:"c1-quran",  icon:"📖", name:"Tilawaat · Adhaan · Hifz-e-Quran", location:"Library",              category:"educational" },
+      { id:"c1-speech", icon:"🎙", name:"Speeches · Nazm",                  location:"Khuddam Room",         category:"educational" },
+      { id:"c1-mem",    icon:"🧠", name:"Memory & Observation",              location:"Main Prayer Hall",     category:"educational" },
+      { id:"c1-sports", icon:"⚽", name:"Soccer · Races · Tug of War",      location:"Soccer / Flag Football Field", category:"sports" },
+      { id:"c1-bball",  icon:"🏀", name:"3PT Basketball (open to all)",      location:"Gym",                  category:"sports" },
+      { id:"c1-hub",    icon:"🎮", name:"Table Tennis · Board Games · Video Games", location:"Hub Zone (Upstairs)", category:"sports" }
     ]
   },
   {
@@ -582,9 +600,9 @@ const DEFAULT_PROGRAM = [
     icon: "🏆",
     type: "main",
     subs: [
-      { id:"c2-vball",  icon:"🏐", name:"Volleyball · Flag Football · Strong Man (Open)", location:"Volleyball Court / Fields" },
-      { id:"c2-hub",    icon:"🎮", name:"Hub Zone (Open)", location:"Hub Zone (Upstairs)" },
-      { id:"c2-work",   icon:"🛠", name:"Workshops", location:"Outdoor Canopy" }
+      { id:"c2-work",   icon:"🛠", name:"Workshops",                                       location:"Outdoor Canopy",             category:"educational" },
+      { id:"c2-vball",  icon:"🏐", name:"Volleyball · Flag Football · Strong Man (Open)", location:"Volleyball Court / Fields",   category:"sports" },
+      { id:"c2-hub",    icon:"🎮", name:"Hub Zone (Open)",                                 location:"Hub Zone (Upstairs)",        category:"sports" }
     ]
   },
   {
@@ -727,16 +745,32 @@ function renderSchedule() {
     if (isCurrent) cls += ' current';
     if (isPast) cls += ' past';
 
-    const subsHtml = ev.subs.length ? `<div class="sub-events">
-      ${ev.subs.map(s => `
+    const hasCategories = ev.subs.some(s => s.category);
+    const renderSub = s => `
         <div class="sub-event">
           <div class="sub-event-icon">${s.icon}</div>
           <div class="sub-event-info">
             <div class="sub-event-name">${s.name}</div>
             <div class="sub-event-location">${s.location}</div>
           </div>
-        </div>`).join('')}
-    </div>` : '';
+        </div>`;
+    let subsHtml = '';
+    if (ev.subs.length && hasCategories) {
+      const edu = ev.subs.filter(s => s.category === 'educational');
+      const sports = ev.subs.filter(s => s.category === 'sports');
+      subsHtml = `<div class="sub-events-columns">
+        <div>
+          <div class="sub-events-col-label">📚 Educational</div>
+          ${edu.map(renderSub).join('')}
+        </div>
+        <div>
+          <div class="sub-events-col-label">🏅 Sports</div>
+          ${sports.map(renderSub).join('')}
+        </div>
+      </div>`;
+    } else if (ev.subs.length) {
+      subsHtml = `<div class="sub-events">${ev.subs.map(renderSub).join('')}</div>`;
+    }
 
     const locLine = ev.location ? `<span style="color:var(--muted);font-size:0.82rem;margin-left:4px">· ${ev.location}</span>` : '';
     const badge = isCurrent ? `<span class="current-label">NOW</span>` : '';
