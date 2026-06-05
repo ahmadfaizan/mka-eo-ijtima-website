@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eastern Ontario Regional Ijtima 2026</title>
+<style>
+  :root {
+    --green: #2d7a4f;
+    --green-light: #e8f5ee;
+    --teal: #1a6b7c;
+    --orange: #e07b39;
+    --gold: #c8a951;
+    --bg: #f7f9f7;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #d1e8da;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--teal) 100%);
+    color: white;
+    padding: 1.5rem 1rem 1rem;
+    text-align: center;
+  }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+  header p { font-size: 0.95rem; opacity: 0.85; margin-top: 0.3rem; }
+  header .date-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 0.25rem 0.9rem;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+
+  nav {
+    background: white;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  nav button {
+    background: none;
+    border: none;
+    padding: 0.85rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  nav button.active {
+    color: var(--green);
+    border-bottom-color: var(--green);
+  }
+  nav button:hover { color: var(--green); }
+
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  /* ── SCHEDULE TAB ── */
+  .now-banner {
+    background: var(--orange);
+    color: white;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .now-banner .dot {
+    width: 10px; height: 10px; background: white;
+    border-radius: 50%; animation: pulse 1.5s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .event-block {
+    background: var(--card);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    border-left: 5px solid var(--green);
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+  .event-block:hover { transform: translateY(-1px); }
+  .event-block.current { border-left-color: var(--orange); background: #fff9f5; }
+  .event-block.past { opacity: 0.55; }
+
+  .event-header {
+    padding: 0.85rem 1rem 0.6rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  .event-time {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--green);
+    white-space: nowrap;
+    padding-top: 2px;
+    min-width: 60px;
+  }
+  .event-block.current .event-time { color: var(--orange); }
+  .event-title {
+    font-size: 1rem;
+    font-weight: 700;
+    flex: 1;
+  }
+  .current-label {
+    background: var(--orange);
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .sub-events { padding: 0 1rem 0.85rem 1rem; }
+  .sub-event {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.45rem 0.7rem;
+    background: var(--green-light);
+    border-radius: 8px;
+    margin-bottom: 0.4rem;
+    font-size: 0.88rem;
+  }
+  .sub-event-icon { font-size: 1rem; flex-shrink: 0; }
+  .sub-event-info { flex: 1; }
+  .sub-event-name { font-weight: 600; }
+  .sub-event-location {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.15rem;
+  }
+  .sub-event-location::before { content: '📍'; font-size: 0.7rem; }
+
+  /* ── MAP TAB ── */
+  .map-wrap {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 1rem;
+    overflow: hidden;
+  }
+  .map-wrap h2 { font-size: 1.1rem; color: var(--teal); margin-bottom: 0.8rem; }
+
+  svg.site-map { width: 100%; height: auto; display: block; }
+
+  .map-zone {
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .map-zone:hover rect, .map-zone:hover polygon { opacity: 0.85; }
+  .map-zone.highlight rect, .map-zone.highlight polygon { stroke: var(--orange) !important; stroke-width: 3 !important; }
+
+  .map-legend {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    background: var(--green-light);
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .legend-item.active { border-color: var(--orange); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  .zone-popup {
+    background: var(--teal);
+    color: white;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    margin-top: 0.8rem;
+    font-size: 0.88rem;
+    display: none;
+  }
+  .zone-popup.show { display: block; }
+  .zone-popup strong { display: block; font-size: 1rem; margin-bottom: 0.3rem; }
+  .zone-popup ul { padding-left: 1.2rem; }
+  .zone-popup li { margin-bottom: 0.2rem; }
+
+  /* ── ADMIN TAB ── */
+  .admin-login {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    max-width: 380px;
+    margin: 2rem auto;
+    text-align: center;
+  }
+  .admin-login h2 { color: var(--teal); margin-bottom: 0.5rem; }
+  .admin-login p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .admin-login input {
+    width: 100%; padding: 0.75rem; border: 2px solid var(--border);
+    border-radius: 8px; font-size: 1rem; margin-bottom: 0.8rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .admin-login input:focus { border-color: var(--green); }
+  .btn {
+    background: var(--green); color: white; border: none;
+    padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.95rem;
+    font-weight: 600; cursor: pointer; transition: background 0.2s;
+    width: 100%;
+  }
+  .btn:hover { background: #246040; }
+  .btn-sm {
+    width: auto; padding: 0.4rem 0.9rem; font-size: 0.82rem;
+    background: var(--teal); border-radius: 6px;
+  }
+  .btn-sm:hover { background: #14505e; }
+  .btn-danger { background: #c0392b; }
+  .btn-danger:hover { background: #962d22; }
+  .error-msg { color: #c0392b; font-size: 0.85rem; margin-top: 0.5rem; }
+
+  .admin-panel { display: none; }
+  .admin-panel.show { display: block; }
+
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .admin-header h2 { color: var(--teal); }
+
+  .edit-card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.8rem;
+    border-left: 4px solid var(--green);
+  }
+  .edit-card-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    color: var(--teal);
+  }
+  .field-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .field-row label { font-size: 0.82rem; color: var(--muted); width: 60px; flex-shrink: 0; font-weight: 600; }
+  .field-row input {
+    flex: 1; min-width: 140px; padding: 0.4rem 0.6rem;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    font-size: 0.88rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .field-row input:focus { border-color: var(--green); }
+  .save-indicator {
+    font-size: 0.75rem; color: var(--green); font-weight: 600;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  .reset-bar {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 1.2rem 0 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Eastern Ontario Regional Ijtima</h1>
+  <p>Baitun Naseer Mosque · Ottawa</p>
+  <div class="date-badge">Saturday, June 6, 2026</div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('schedule', this)">📅 Schedule</button>
+  <button onclick="showTab('map', this)">🗺 Site Map</button>
+  <button onclick="showTab('admin', this)">⚙️ Organizers</button>
+</nav>
+
+<div id="schedule" class="tab active">
+  <div class="container">
+    <div id="now-banner" class="now-banner" style="display:none">
+      <div class="dot"></div>
+      <span id="now-text"></span>
+    </div>
+    <div id="schedule-list"></div>
+  </div>
+</div>
+
+<div id="map" class="tab">
+  <div class="container">
+    <div class="map-wrap">
+      <h2>Site Map</h2>
+      <svg class="site-map" viewBox="0 0 700 520" xmlns="http://www.w3.org/2000/svg">
+        <!-- Road -->
+        <rect x="0" y="60" width="700" height="60" fill="#d0d0d0"/>
+        <text x="300" y="97" font-size="14" fill="#555" font-family="sans-serif" font-weight="600">Market St.</text>
+        <!-- Road markings -->
+        <line x1="80" y1="90" x2="160" y2="90" stroke="white" stroke-width="3" stroke-dasharray="20,15"/>
+        <line x1="230" y1="90" x2="310" y2="90" stroke="white" stroke-width="3" stroke-dasharray="20,15"/>
+        <line x1="450" y1="90" x2="530" y2="90" stroke="white" stroke-width="3" stroke-dasharray="20,15"/>
+
+        <!-- Parking lots (top) -->
+        <g class="map-zone" id="zone-parking" onclick="selectZone('parking')">
+          <rect x="30" y="0" width="80" height="58" rx="6" fill="#e8e8e8" stroke="#aaa" stroke-width="1.5"/>
+          <text x="70" y="25" text-anchor="middle" font-size="22" font-family="sans-serif">🅿</text>
+          <text x="70" y="48" text-anchor="middle" font-size="10" fill="#555" font-family="sans-serif">Parking</text>
+          <rect x="180" y="0" width="80" height="58" rx="6" fill="#e8e8e8" stroke="#aaa" stroke-width="1.5"/>
+          <text x="220" y="25" text-anchor="middle" font-size="22" font-family="sans-serif">🅿</text>
+          <text x="220" y="48" text-anchor="middle" font-size="10" fill="#555" font-family="sans-serif">Parking</text>
+          <rect x="370" y="0" width="80" height="58" rx="6" fill="#e8e8e8" stroke="#aaa" stroke-width="1.5"/>
+          <text x="410" y="25" text-anchor="middle" font-size="22" font-family="sans-serif">🅿</text>
+          <text x="410" y="48" text-anchor="middle" font-size="10" fill="#555" font-family="sans-serif">Parking</text>
+          <rect x="510" y="0" width="80" height="58" rx="6" fill="#e8e8e8" stroke="#aaa" stroke-width="1.5"/>
+          <text x="550" y="25" text-anchor="middle" font-size="22" font-family="sans-serif">🅿</text>
+          <text x="550" y="48" text-anchor="middle" font-size="10" fill="#555" font-family="sans-serif">Parking</text>
+        </g>
+
+        <!-- Side parking left -->
+        <g class="map-zone" id="zone-parking2" onclick="selectZone('parking')">
+          <rect x="30" y="140" width="80" height="60" rx="6" fill="#e8e8e8" stroke="#aaa" stroke-width="1.5"/>
+          <text x="70" y="165" text-anchor="middle" font-size="22" font-family="sans-serif">🅿</text>
+          <text x="70" y="188" text-anchor="middle" font-size="10" fill="#555" font-family="sans-serif">Parking</text>
+        </g>
+
+        <!-- Green grounds -->
+        <rect x="130" y="120" width="540" height="400" rx="8" fill="#c8e6c9" stroke="#a5d6a7" stroke-width="1"/>
+
+        <!-- Mosque -->
+        <g class="map-zone" id="zone-mosque" onclick="selectZone('mosque')">
+          <rect x="220" y="135" width="260" height="150" rx="8" fill="#1a6b7c" stroke="#0d4a57" stroke-width="2"/>
+          <!-- Mosque extension -->
+          <rect x="340" y="265" width="60" height="50" rx="4" fill="#1a6b7c" stroke="#0d4a57" stroke-width="2"/>
+          <text x="350" y="218" text-anchor="middle" font-size="22" fill="white" font-family="sans-serif" font-weight="700">Mosque</text>
+          <text x="350" y="242" text-anchor="middle" font-size="11" fill="#b2dfdb" font-family="sans-serif">Baitun Naseer</text>
+        </g>
+
+        <!-- No Parking sign -->
+        <text x="500" y="175" font-size="20" text-anchor="middle">🚫</text>
+        <text x="500" y="192" font-size="9" text-anchor="middle" fill="#555" font-family="sans-serif">No Parking</text>
+
+        <!-- Gym / Weights zone -->
+        <g class="map-zone" id="zone-gym" onclick="selectZone('gym')">
+          <rect x="150" y="245" width="70" height="60" rx="6" fill="#ffe0b2" stroke="#ffb74d" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="185" y="272" text-anchor="middle" font-size="18" font-family="sans-serif">🏋️</text>
+          <text x="185" y="292" text-anchor="middle" font-size="9" fill="#444" font-family="sans-serif" font-weight="700">Gym</text>
+        </g>
+
+        <!-- BBQ / Canopy -->
+        <g class="map-zone" id="zone-bbq" onclick="selectZone('canopy')">
+          <rect x="430" y="265" width="80" height="65" rx="6" fill="#fff9c4" stroke="#f9a825" stroke-width="2" stroke-dasharray="6,3"/>
+          <text x="470" y="292" text-anchor="middle" font-size="18" font-family="sans-serif">🍖</text>
+          <text x="470" y="310" text-anchor="middle" font-size="9" fill="#444" font-family="sans-serif" font-weight="700">BBQ / Canopy</text>
+        </g>
+
+        <!-- Volleyball -->
+        <g class="map-zone" id="zone-volleyball" onclick="selectZone('volleyball')">
+          <rect x="560" y="135" width="120" height="100" rx="8" fill="#e3f2fd" stroke="#90caf9" stroke-width="2" stroke-dasharray="8,4"/>
+          <text x="620" y="175" text-anchor="middle" font-size="22" font-family="sans-serif">🏐</text>
+          <text x="620" y="198" text-anchor="middle" font-size="11" fill="#1565c0" font-family="sans-serif" font-weight="700">Volleyball</text>
+        </g>
+
+        <!-- Soccer / Flag Football field -->
+        <g class="map-zone" id="zone-fields" onclick="selectZone('fields')">
+          <rect x="150" y="360" width="270" height="140" rx="8" fill="#dcedc8" stroke="#8bc34a" stroke-width="2" stroke-dasharray="8,4"/>
+          <!-- Field lines -->
+          <line x1="285" y1="360" x2="285" y2="500" stroke="#8bc34a" stroke-width="1.5" stroke-dasharray="10,8"/>
+          <text x="217" y="430" text-anchor="middle" font-size="12" fill="#2e7d32" font-family="sans-serif" font-weight="700">Soccer /</text>
+          <text x="217" y="448" text-anchor="middle" font-size="12" fill="#2e7d32" font-family="sans-serif" font-weight="700">Atfal Rec.</text>
+          <text x="217" y="465" text-anchor="middle" font-size="11" fill="#2e7d32" font-family="sans-serif">Flag Football</text>
+        </g>
+
+        <!-- Atfal field -->
+        <g class="map-zone" id="zone-atfal" onclick="selectZone('atfal')">
+          <rect x="450" y="360" width="230" height="140" rx="8" fill="#f3e5f5" stroke="#ce93d8" stroke-width="2" stroke-dasharray="8,4"/>
+          <text x="565" y="420" text-anchor="middle" font-size="22" font-family="sans-serif">⭐</text>
+          <text x="565" y="448" text-anchor="middle" font-size="12" fill="#6a1b9a" font-family="sans-serif" font-weight="700">Atfal Field</text>
+        </g>
+
+        <!-- Hub Zone label (inside mosque area, upper floor) -->
+        <g class="map-zone" id="zone-hub" onclick="selectZone('hub')">
+          <rect x="220" y="135" width="120" height="50" rx="6" fill="rgba(255,255,255,0.15)"/>
+          <text x="280" y="155" text-anchor="middle" font-size="10" fill="white" font-family="sans-serif" font-weight="700">Hub Zone</text>
+          <text x="280" y="170" text-anchor="middle" font-size="9" fill="#b2dfdb" font-family="sans-serif">(Upstairs)</text>
+        </g>
+
+        <!-- North arrow -->
+        <g transform="translate(655,490)">
+          <circle r="16" fill="white" stroke="#999" stroke-width="1"/>
+          <text x="0" y="-4" text-anchor="middle" font-size="14" font-family="sans-serif" font-weight="700" fill="#333">N</text>
+          <polygon points="0,-16 4,-4 -4,-4" fill="#333"/>
+        </g>
+      </svg>
+
+      <div class="map-legend">
+        <div class="legend-item" onclick="selectZone('mosque')" id="leg-mosque">
+          <div class="legend-dot" style="background:#1a6b7c"></div> Mosque
+        </div>
+        <div class="legend-item" onclick="selectZone('gym')" id="leg-gym">
+          <div class="legend-dot" style="background:#ffb74d"></div> Gym
+        </div>
+        <div class="legend-item" onclick="selectZone('volleyball')" id="leg-volleyball">
+          <div class="legend-dot" style="background:#90caf9"></div> Volleyball
+        </div>
+        <div class="legend-item" onclick="selectZone('fields')" id="leg-fields">
+          <div class="legend-dot" style="background:#8bc34a"></div> Soccer / Flag Football
+        </div>
+        <div class="legend-item" onclick="selectZone('atfal')" id="leg-atfal">
+          <div class="legend-dot" style="background:#ce93d8"></div> Atfal Field
+        </div>
+        <div class="legend-item" onclick="selectZone('canopy')" id="leg-canopy">
+          <div class="legend-dot" style="background:#f9a825"></div> BBQ / Canopy
+        </div>
+        <div class="legend-item" onclick="selectZone('hub')" id="leg-hub">
+          <div class="legend-dot" style="background:#546e7a"></div> Hub Zone
+        </div>
+        <div class="legend-item" onclick="selectZone('parking')" id="leg-parking">
+          <div class="legend-dot" style="background:#aaa"></div> Parking
+        </div>
+      </div>
+
+      <div id="zone-popup" class="zone-popup"></div>
+    </div>
+  </div>
+</div>
+
+<div id="admin" class="tab">
+  <div class="container">
+    <div id="admin-login-box" class="admin-login">
+      <h2>🔐 Organizer Access</h2>
+      <p>Enter the organizer password to edit the program schedule.</p>
+      <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="btn" onclick="doLogin()">Sign In</button>
+      <div id="pw-error" class="error-msg"></div>
+    </div>
+
+    <div id="admin-panel" class="admin-panel">
+      <div class="admin-header">
+        <h2>⚙️ Edit Program</h2>
+        <button class="btn btn-sm" onclick="doLogout()">Sign Out</button>
+      </div>
+      <div class="reset-bar">
+        ⚠️ Changes are saved instantly and visible to all attendees.
+        <button class="btn btn-sm btn-danger" onclick="resetAll()">Reset to Defaults</button>
+      </div>
+      <div id="edit-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DEFAULT PROGRAM DATA ──────────────────────────────────────────────────────
+const DEFAULT_PROGRAM = [
+  {
+    id: "reg",
+    time: "8:00 AM",
+    title: "Registration & Breakfast",
+    location: "Main Entrance",
+    icon: "🍳",
+    type: "main",
+    subs: []
+  },
+  {
+    id: "open",
+    time: "9:00 AM",
+    title: "Opening Session",
+    location: "Main Prayer Hall",
+    icon: "🕌",
+    type: "main",
+    subs: []
+  },
+  {
+    id: "comp1",
+    time: "10:00 AM",
+    title: "Competitions Session 1",
+    location: "",
+    icon: "🏆",
+    type: "main",
+    subs: [
+      { id:"c1-sports", icon:"⚽", name:"Soccer · Races · Tug of War", location:"Soccer / Flag Football Field" },
+      { id:"c1-bball",  icon:"🏀", name:"3PT Basketball (open to all)", location:"Gym" },
+      { id:"c1-quran",  icon:"📖", name:"Tilawaat · Adhaan · Hifz-e-Quran", location:"Library" },
+      { id:"c1-speech", icon:"🎙", name:"Speeches · Nazm", location:"Khuddam Room" },
+      { id:"c1-mem",    icon:"🧠", name:"Memory & Observation", location:"Main Prayer Hall" },
+      { id:"c1-hub",    icon:"🎮", name:"Table Tennis · Board Games · Video Games", location:"Hub Zone (Upstairs)" }
+    ]
+  },
+  {
+    id: "lunch",
+    time: "12:30 PM",
+    title: "Lunch",
+    location: "BBQ / Outdoor Canopy",
+    icon: "🍽",
+    type: "main",
+    subs: []
+  },
+  {
+    id: "salat",
+    time: "1:30 PM",
+    title: "Salat-e-Zuhr & Asr",
+    location: "Main Prayer Hall",
+    icon: "🕌",
+    type: "main",
+    subs: []
+  },
+  {
+    id: "qa",
+    time: "1:45 PM",
+    title: "Khuddam Q&A: Unfiltered",
+    location: "Main Prayer Hall",
+    icon: "💬",
+    type: "main",
+    subs: []
+  },
+  {
+    id: "comp2",
+    time: "2:30 PM",
+    title: "Competitions Session 2",
+    location: "",
+    icon: "🏆",
+    type: "main",
+    subs: [
+      { id:"c2-vball",  icon:"🏐", name:"Volleyball · Flag Football · Strong Man (Open)", location:"Volleyball Court / Fields" },
+      { id:"c2-hub",    icon:"🎮", name:"Hub Zone (Open)", location:"Hub Zone (Upstairs)" },
+      { id:"c2-work",   icon:"🛠", name:"Workshops", location:"Outdoor Canopy" }
+    ]
+  },
+  {
+    id: "close",
+    time: "5:00 PM",
+    title: "Closing Session",
+    location: "Main Prayer Hall",
+    icon: "🏅",
+    type: "main",
+    subs: []
+  },
+  {
+    id: "windup",
+    time: "5:30 PM",
+    title: "Wind-up (All Khuddam to support)",
+    location: "Grounds",
+    icon: "🤝",
+    type: "main",
+    subs: []
+  }
+];
+
+const ZONE_INFO = {
+  mosque:     { label:"Mosque (Baitun Naseer)", color:"#1a6b7c",
+    events:["Opening Session (9:00 AM)","Salat-e-Zuhr & Asr (1:30 PM)","Khuddam Q&A (1:45 PM)","Closing Session (5:00 PM)"],
+    rooms:["Main Prayer Hall","Library","Khuddam Room","Hub Zone (upstairs)"] },
+  gym:        { label:"Gym", color:"#ffb74d",
+    events:["3PT Basketball – Competitions Session 1 (10:00 AM)"],
+    rooms:["Basketball court (ground floor)"] },
+  volleyball: { label:"Volleyball Court", color:"#1565c0",
+    events:["Volleyball – Competitions Session 2 (2:30 PM)"],
+    rooms:["Outdoor court (east side)"] },
+  fields:     { label:"Soccer / Atfal Rec. / Flag Football", color:"#2e7d32",
+    events:["Soccer, Races, Tug of War – Session 1 (10:00 AM)","Flag Football – Session 2 (2:30 PM)"],
+    rooms:["South field"] },
+  atfal:      { label:"Atfal Field", color:"#6a1b9a",
+    events:["Atfal recreational activities"],
+    rooms:["East field (reserved for Atfal)"] },
+  canopy:     { label:"BBQ / Outdoor Canopy", color:"#e65100",
+    events:["Lunch (12:30 PM)","Workshops – Session 2 (2:30 PM)"],
+    rooms:["Outdoor canopy behind mosque"] },
+  hub:        { label:"Hub Zone (Upstairs)", color:"#546e7a",
+    events:["Table Tennis · Board Games · Video Games – Session 1 (10:00 AM)","Hub Zone Open – Session 2 (2:30 PM)"],
+    rooms:["Upper floor of mosque"] },
+  parking:    { label:"Parking", color:"#aaa",
+    events:["Market St. north side & west side"],
+    rooms:["No parking on east side (No Parking sign)"] }
+};
+
+// ── STATE & PERSISTENCE ───────────────────────────────────────────────────────
+const STORAGE_KEY = "ijtima2026_program";
+const ADMIN_PW = "ijtima2026";
+
+function loadProgram() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+}
+
+function saveProgram(prog) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(prog));
+}
+
+function resetAll() {
+  if (!confirm("Reset all times and locations to defaults?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  program = JSON.parse(JSON.stringify(DEFAULT_PROGRAM));
+  renderSchedule();
+  renderEditList();
+}
+
+let program = loadProgram();
+
+// ── TAB ROUTING ───────────────────────────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'schedule') renderSchedule();
+}
+
+// ── TIME UTILS ────────────────────────────────────────────────────────────────
+function parseTime(str) {
+  // handles "8:00 AM", "10:00 AM", "1:30 PM" etc.
+  const m = str.trim().match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1]), min = parseInt(m[2]);
+  const ap = m[3].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h * 60 + min;
+}
+
+function getCurrentEvent() {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  // Use event date: June 6 2026
+  const eventDate = new Date(2026, 5, 6);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (today.getTime() !== eventDate.getTime()) return null;
+
+  for (let i = 0; i < program.length; i++) {
+    const start = parseTime(program[i].time);
+    const end = i + 1 < program.length ? parseTime(program[i+1].time) : start + 60;
+    if (nowMin >= start && nowMin < end) return program[i].id;
+  }
+  return null;
+}
+
+// ── SCHEDULE RENDER ───────────────────────────────────────────────────────────
+function renderSchedule() {
+  const currentId = getCurrentEvent();
+  const now = new Date();
+  const eventDate = new Date(2026, 5, 6);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isEventDay = today.getTime() === eventDate.getTime();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  const banner = document.getElementById('now-banner');
+  const bannerText = document.getElementById('now-text');
+
+  if (currentId) {
+    const ev = program.find(e => e.id === currentId);
+    bannerText.textContent = `Now: ${ev.title} — ${ev.location || 'see sub-events below'}`;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  const list = document.getElementById('schedule-list');
+  list.innerHTML = program.map(ev => {
+    const isCurrent = ev.id === currentId;
+    const evMin = parseTime(ev.time);
+    const isPast = isEventDay && evMin !== null && nowMin > evMin && !isCurrent;
+
+    let cls = 'event-block';
+    if (isCurrent) cls += ' current';
+    if (isPast) cls += ' past';
+
+    const subsHtml = ev.subs.length ? `<div class="sub-events">
+      ${ev.subs.map(s => `
+        <div class="sub-event">
+          <div class="sub-event-icon">${s.icon}</div>
+          <div class="sub-event-info">
+            <div class="sub-event-name">${s.name}</div>
+            <div class="sub-event-location">${s.location}</div>
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+
+    const locLine = ev.location ? `<span style="color:var(--muted);font-size:0.82rem;margin-left:4px">· ${ev.location}</span>` : '';
+    const badge = isCurrent ? `<span class="current-label">NOW</span>` : '';
+
+    return `<div class="${cls}">
+      <div class="event-header">
+        <div class="event-time">${ev.time}</div>
+        <div class="event-title">${ev.icon} ${ev.title}${locLine}</div>
+        ${badge}
+      </div>
+      ${subsHtml}
+    </div>`;
+  }).join('');
+}
+
+// ── MAP ───────────────────────────────────────────────────────────────────────
+let activeZone = null;
+
+function selectZone(id) {
+  // deselect previous
+  if (activeZone) {
+    const oldZone = document.getElementById('zone-' + activeZone);
+    if (oldZone) oldZone.classList.remove('highlight');
+    const oldLeg = document.getElementById('leg-' + activeZone);
+    if (oldLeg) oldLeg.classList.remove('active');
+  }
+
+  if (activeZone === id) {
+    activeZone = null;
+    document.getElementById('zone-popup').classList.remove('show');
+    return;
+  }
+  activeZone = id;
+
+  const zone = ZONE_INFO[id];
+  if (!zone) return;
+
+  const el = document.getElementById('zone-' + id);
+  if (el) el.classList.add('highlight');
+  const leg = document.getElementById('leg-' + id);
+  if (leg) leg.classList.add('active');
+
+  const popup = document.getElementById('zone-popup');
+  popup.innerHTML = `<strong>📍 ${zone.label}</strong>
+    <ul>${zone.events.map(e => `<li>${e}</li>`).join('')}</ul>
+    ${zone.rooms.length > 1 ? `<div style="margin-top:0.4rem;font-size:0.8rem;opacity:0.8">Includes: ${zone.rooms.join(' · ')}</div>` : ''}`;
+  popup.classList.add('show');
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+let adminLoggedIn = false;
+
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PW) {
+    adminLoggedIn = true;
+    document.getElementById('admin-login-box').style.display = 'none';
+    document.getElementById('admin-panel').classList.add('show');
+    renderEditList();
+  } else {
+    document.getElementById('pw-error').textContent = 'Incorrect password.';
+    setTimeout(() => document.getElementById('pw-error').textContent = '', 2000);
+  }
+}
+
+function doLogout() {
+  adminLoggedIn = false;
+  document.getElementById('admin-login-box').style.display = 'block';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('admin-panel').classList.remove('show');
+}
+
+function renderEditList() {
+  const list = document.getElementById('edit-list');
+  list.innerHTML = '';
+
+  program.forEach(ev => {
+    const card = document.createElement('div');
+    card.className = 'edit-card';
+
+    const saveId = `save-${ev.id}`;
+
+    card.innerHTML = `
+      <div class="edit-card-title">${ev.icon} ${ev.title}</div>
+      <div class="field-row">
+        <label>Time</label>
+        <input type="text" id="time-${ev.id}" value="${ev.time}" placeholder="e.g. 10:00 AM" oninput="updateField('${ev.id}','time',this.value,'${saveId}')"/>
+      </div>
+      <div class="field-row">
+        <label>Location</label>
+        <input type="text" id="loc-${ev.id}" value="${ev.location}" placeholder="Location or leave blank" oninput="updateField('${ev.id}','location',this.value,'${saveId}')"/>
+      </div>
+      <span class="save-indicator" id="${saveId}">✓ Saved</span>
+      ${ev.subs.length ? '<div class="section-label">Sub-events</div>' : ''}
+      ${ev.subs.map(s => `
+        <div class="edit-card" style="border-left-color:var(--teal);margin-bottom:0.4rem">
+          <div class="edit-card-title" style="font-size:0.85rem">${s.icon} ${s.name}</div>
+          <div class="field-row">
+            <label>Location</label>
+            <input type="text" id="subloc-${s.id}" value="${s.location}" placeholder="Location" oninput="updateSubField('${ev.id}','${s.id}','location',this.value,'${saveId}')"/>
+          </div>
+        </div>`).join('')}
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+function flashSaved(saveId) {
+  const el = document.getElementById(saveId);
+  if (!el) return;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function updateField(evId, field, value, saveId) {
+  const ev = program.find(e => e.id === evId);
+  if (ev) { ev[field] = value; saveProgram(program); flashSaved(saveId); renderSchedule(); }
+}
+
+function updateSubField(evId, subId, field, value, saveId) {
+  const ev = program.find(e => e.id === evId);
+  if (ev) {
+    const sub = ev.subs.find(s => s.id === subId);
+    if (sub) { sub[field] = value; saveProgram(program); flashSaved(saveId); renderSchedule(); }
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderSchedule();
+setInterval(renderSchedule, 60000); // refresh every minute
+</script>
+</body>
+</html>
